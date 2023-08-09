@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchoolOfDevs.Entities;
+using SchoolOfDevs.Exceptions;
 using SchoolOfDevs.Helpers;
 
 namespace SchoolOfDevs.Services
@@ -28,7 +29,7 @@ namespace SchoolOfDevs.Services
                  .SingleOrDefaultAsync(u => u.Id == id);
 
             if (noteDb is null)
-                throw new Exception($"Note {id} not found.");
+                throw new KeyNotFoundException($"Note {id} not found.");
 
             _context.Notes.Remove(noteDb);
             await _context.SaveChangesAsync();
@@ -45,7 +46,7 @@ namespace SchoolOfDevs.Services
                 .SingleOrDefaultAsync(u => u.Id == id);
 
             if (noteDb is null)
-                throw new Exception($"Note {id} not found.");
+                throw new KeyNotFoundException($"Note {id} not found.");
 
             return noteDb;
         }
@@ -61,14 +62,14 @@ namespace SchoolOfDevs.Services
         public async Task Update(Note noteIn, int id)
         {
             if (noteIn.Id != id)
-                throw new Exception("Route id differs Note id");
+                throw new BadRequestException("Route id differs Note id");
 
             Note noteDb = await _context.Notes
                 .AsNoTracking()
                 .SingleOrDefaultAsync(u => u.Id == id);
 
             if (noteDb is null)
-                throw new Exception($"Note {id} not found.");
+                throw new KeyNotFoundException($"Note {id} not found.");
 
             noteIn.CreatedAt = noteDb.CreatedAt;
 

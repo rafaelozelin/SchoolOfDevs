@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchoolOfDevs.Entities;
+using SchoolOfDevs.Exceptions;
 using SchoolOfDevs.Helpers;
 
 namespace SchoolOfDevs.Services
@@ -28,7 +29,7 @@ namespace SchoolOfDevs.Services
                  .SingleOrDefaultAsync(c => c.Id == id);
 
             if (courseDb is null)
-                throw new Exception($"Course {id} not found.");
+                throw new KeyNotFoundException($"Course {id} not found.");
 
             _context.Courses.Remove(courseDb);
             await _context.SaveChangesAsync();
@@ -45,20 +46,13 @@ namespace SchoolOfDevs.Services
                 .SingleOrDefaultAsync(c => c.Id == id);
 
             if (courseDb is null)
-                throw new Exception($"Course {id} not found.");
+                throw new KeyNotFoundException($"Course {id} not found.");
 
             return courseDb;
         }
 
         public async Task<Course> Create(Course course)
         {
-            Course courseDb = await _context.Courses
-                .AsNoTracking()
-                .SingleOrDefaultAsync(c => c.Name == course.Name);
-
-            if (courseDb is not null)
-                throw new Exception($"UserName {course.Name} already exist.");
-
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
 
@@ -68,14 +62,14 @@ namespace SchoolOfDevs.Services
         public async Task Update(Course courseIn, int id)
         {
             if (courseIn.Id != id)
-                throw new Exception("Route id differs User id");
+                throw new BadRequestException("Route id differs User id");
 
             Course courseDb = await _context.Courses
                 .AsNoTracking()
                 .SingleOrDefaultAsync(u => u.Id == id);
 
             if (courseDb is null)
-                throw new Exception($"Course {id} not found.");
+                throw new KeyNotFoundException($"Course {id} not found.");
 
             courseIn.CreatedAt = courseDb.CreatedAt;
 
