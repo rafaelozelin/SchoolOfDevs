@@ -115,7 +115,7 @@ namespace SchoolOfDevs.Services
             userDb = _mapper.Map<User>(userRequest);
             userDb.Password = BC.HashPassword(userRequest.Password);
 
-            _context.Entry(userRequest).State = EntityState.Modified;
+            _context.Entry(userDb).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 

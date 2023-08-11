@@ -34,9 +34,9 @@ namespace SchoolOfDevs.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromBody] UserRequestUpdate userIn, int id)
+        public async Task<IActionResult> Update([FromBody] UserRequestUpdate userRequest, int id)
         {
-            await _service.Update(userIn, id);
+            await _service.Update(userRequest, id);
 
             return NoContent();
         }

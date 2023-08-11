@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using SchoolOfDevs.Entities;
+using SchoolOfDevs.Dto.Course;
 using SchoolOfDevs.Services;
 
 namespace SchoolOfDevs.Controllers
@@ -16,9 +16,9 @@ namespace SchoolOfDevs.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Course course)
+        public async Task<IActionResult> Create([FromBody] CourseRequest courseRequest)
         {
-            return Ok(await _service.Create(course));
+            return Ok(await _service.Create(courseRequest));
         }
 
         [HttpGet]
@@ -34,9 +34,9 @@ namespace SchoolOfDevs.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromBody] Course userIn, int id)
+        public async Task<IActionResult> Update([FromBody] CourseRequest courseRequest, int id)
         {
-            await _service.Update(userIn, id);
+            await _service.Update(courseRequest, id);
 
             return NoContent();
         }
