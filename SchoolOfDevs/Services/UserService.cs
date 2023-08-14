@@ -24,12 +24,14 @@ namespace SchoolOfDevs.Services
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly IJwtService _jwtService;
+        private readonly IHttpContextAccessor _httpContext;
 
-        public UserService(DataContext context, IMapper mapper, IJwtService jwtService)
+        public UserService(DataContext context, IMapper mapper, IJwtService jwtService, IHttpContextAccessor httpContext)
         {
             _context = context;
             _mapper = mapper;
             _jwtService = jwtService;
+            _httpContext = httpContext;
         }
         
         public async Task Delete(int id)
@@ -37,8 +39,12 @@ namespace SchoolOfDevs.Services
             User userDb = await _context.Users
                  .SingleOrDefaultAsync(u => u.Id == id);
 
+            UserResponse currentUser = (UserResponse)_httpContext?.HttpContext?.Items["User"];
+
             if (userDb is null)
                 throw new KeyNotFoundException($"User {id} not found.");
+            else if (currentUser?.Id != userDb.Id)
+                throw new ForbiddenException("Forbbiden");
 
             _context.Users.Remove(userDb);
             await _context.SaveChangesAsync();
@@ -108,8 +114,12 @@ namespace SchoolOfDevs.Services
                 .Include(e => e.CoursesStuding)
                 .SingleOrDefaultAsync(u => u.Id == id);
 
+            UserResponse currentUser = (UserResponse)_httpContext?.HttpContext?.Items["User"];
+
             if (userDb is null)
                 throw new KeyNotFoundException($"User {id} not found.");
+            else if (currentUser?.Id != userDb.Id)
+                throw new ForbiddenException("Forbbiden");
             else if (!BC.Verify(userRequest.CurrentPassword, userDb.Password))
                 throw new BadRequestException("Incorrect Password");
 
