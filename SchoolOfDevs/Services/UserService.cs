@@ -11,6 +11,7 @@ namespace SchoolOfDevs.Services
 {
     public interface IUserService
     {
+        public Task<AuthenticateResponse> Authenticate(AuthenticateRequest request);
         public Task<List<UserResponse>> GetAll();
         public Task<UserResponse> GetById(int id);
         public Task<UserResponse> Create(UserRequest user);
@@ -22,11 +23,13 @@ namespace SchoolOfDevs.Services
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly IJwtService _jwtService;
 
-        public UserService(DataContext context, IMapper mapper)
+        public UserService(DataContext context, IMapper mapper, IJwtService jwtService)
         {
             _context = context;
             _mapper = mapper;
+            _jwtService = jwtService;
         }
         
         public async Task Delete(int id)
@@ -150,6 +153,21 @@ namespace SchoolOfDevs.Services
 
             await _context.SaveChangesAsync();
             _context.Entry(userDb).State = EntityState.Detached;
+        }
+
+        public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest request)
+        {
+            User userDb = await _context.Users
+                .SingleOrDefaultAsync(u => u.UserName == request.UserName);
+
+            if (userDb is null)
+                throw new KeyNotFoundException($"User {request.UserName} not found.");
+            else if (!BC.Verify(request.Password, userDb.Password))
+                throw new BadRequestException("Incorrect Password");
+
+            string token = _jwtService.GenerateJwtToken(userDb);
+         
+            return new AuthenticateResponse(userDb, token);
         }
     }
 }
